@@ -1,3 +1,4 @@
 .spyproject
 data
-./test.py
+./src/test.py
+./src/pychache
