@@ -1,4 +1,4 @@
 .spyproject
 data
 ./src/test.py
-./src/pychache
+./src/__pycache__

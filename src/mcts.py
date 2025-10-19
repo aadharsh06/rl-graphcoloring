@@ -18,7 +18,6 @@ max_colors = 10
 
 class state_graph():
     def __init__ ( self, A ):
-        np.random.shuffle ( A )
         self.graph = A
         self.colors = np.zeros ( ( 1, A.shape[0] ) )
 
@@ -29,9 +28,9 @@ class Node():
         self.vertex = vertex
         self.color = color
         
-        self.n_sa = np.zeros ( ( 1, max_colors ) )
-        self.w_sa = np.zeros ( ( 1, max_colors ) )
-        self.q_sa = np.zeros ( ( 1, max_colors ) )
+        self.n_sa = np.zeros ( max_colors )
+        self.w_sa = np.zeros ( max_colors )
+        self.q_sa = np.zeros ( max_colors )
         
         self.children = []
         self.is_leaf = True
@@ -99,7 +98,7 @@ def run_simulation ( cur_graph, root ):
     R = reward ( H )
     
     for i in range ( len ( H ) ):
-        H[i][0].n_sa[0][H[i][1]] += 1
+        H[i].n_sa[0][H[i][1]] += 1
         H[i][0].w_sa[0][H[i][1]] += R
         H[i][0].q_sa[0][H[i][1]] = ( H[i][0].w_sa[0][H[i][1]] ) / ( H[i][0].n_sa[0][H[i][1]] )
         #print ( H[i][0].color, H[i][1], end = " | " )
@@ -109,7 +108,7 @@ def run_episode ( A ):
     cur_graph = state_graph ( A )
     root = Node ( 0, 1, max_colors )
     
-    for i in range ( 10 ):
+    for i in range ( 150 ):
         run_simulation ( cur_graph, root )
     root.print_details()
 
