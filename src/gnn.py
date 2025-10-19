@@ -3,13 +3,13 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 
-max_colors = 5
+max_colors = 10
 
 class GNN_Model ( torch.nn.Module ):
     def __init__ ( self, max_colors ):
         super().__init__()
         
-        k = max_colors + 2
+        k = max_colors + 1
         self.layer1 = GCNConv ( k, k )
         self.layer2 = GCNConv ( k, k )
         self.layer3 = GCNConv ( k, max_colors )
