@@ -14,7 +14,7 @@ def init_features ( A, max_colors ):
     
     degree = np.sum ( A, axis = 0 ).reshape ( -1, 1 )
     deg_max = np.max ( degree )
-    degree = degree / deg_max
+    degree = degree / ( deg_max + 1 )
     
     cur_colored = np.zeros ( ( degree.size, max_colors ) )
         
