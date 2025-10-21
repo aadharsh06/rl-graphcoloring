@@ -6,6 +6,8 @@ import numpy as np
 import gnn
 import helper as h
 import torch
+import os
+import pickle as p
 
 # Test A
 A = np.array ( [
@@ -19,7 +21,7 @@ max_colors = 10
 class state_graph():
     def __init__ ( self, A ):
         self.graph = A
-        self.colors = np.zeros ( A.shape[0] )
+        self.colors = np.zeros ( A.shape[0], dtype = int )
 
 class Node():
     def __init__ ( self, vertex, color, max_colors ):
@@ -91,7 +93,7 @@ def u_sa_calc ( H, cur_graph, cur_node ):
     
     X = torch.tensor ( X, dtype = torch.float )
     p_sa = gnn.forward_pass ( X, edge_index )
-    p_sa = (p_sa.detach().numpy())[cur_node.vertex]
+    p_sa = ( p_sa.detach().numpy() )[cur_node.vertex]
     
     u_sa = c_puct * p_sa * np.sqrt ( cur_node.n_sa.sum() / ( 1 + cur_node.n_sa ) )
     return u_sa
@@ -128,6 +130,8 @@ def print_tree ( node ):
         print_tree ( child )
 
 def run_episode ( A ):
+    max_file = int ( sorted ( os.listdir ( "../training_data" ), reverse = True )[0].split ( "." )[0][1:] )
+    
     cur_graph = state_graph ( A )
     root = Node ( 0, 1, max_colors )
     
@@ -139,6 +143,19 @@ def run_episode ( A ):
         
         assign_color = np.argmax ( root.n_sa ) + 1
         cur_graph.colors[vertex+1] = assign_color
+        
+        X , _ = h.init_features ( A, max_colors )
+        
+        for i in range ( len ( X ) ):
+            if cur_graph.colors[i]:
+                X[i][cur_graph.colors[i]-1] = 1
+        
+        training_data = ( ( X, A ), root.n_sa )
+        
+        with open ( "../training_data/x{}.pkl".format ( str ( max_file + 1 ) ), "wb" ) as f:
+            p.dump ( training_data, f )
+        max_file += 1
+        
         root = root.children[assign_color - 1]
         
     print ( cur_graph.colors )
