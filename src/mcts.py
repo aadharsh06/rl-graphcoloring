@@ -6,15 +6,9 @@ import numpy as np
 import gnn
 import helper as h
 import torch
-import os
 import pickle as p
-
-# Test A
-A = np.array ( [
-    [ 0, 1, 1 ],
-    [ 1, 0, 0 ],
-    [ 1, 0, 0 ]
-] )
+import re
+import os
 
 max_colors = 10
 
@@ -130,8 +124,7 @@ def print_tree ( node ):
         print_tree ( child )
 
 def run_episode ( A ):
-    max_file = int ( sorted ( os.listdir ( "../training_data" ), reverse = True )[0].split ( "." )[0][1:] )
-    
+    max_file = int ( max ( os.listdir ( "../training_data" ), key = lambda f: int ( re.search ( r'\d+', f ).group() ) ).split('.')[0][1:] )
     cur_graph = state_graph ( A )
     root = Node ( 0, 1, max_colors )
     
@@ -150,14 +143,10 @@ def run_episode ( A ):
             if cur_graph.colors[i]:
                 X[i][cur_graph.colors[i]-1] = 1
         
-        training_data = ( ( X, A ), root.n_sa )
+        training_data = ( ( X, A ), vertex, root.n_sa )
         
         with open ( "../training_data/x{}.pkl".format ( str ( max_file + 1 ) ), "wb" ) as f:
             p.dump ( training_data, f )
         max_file += 1
         
         root = root.children[assign_color - 1]
-        
-    print ( cur_graph.colors )
-
-run_episode ( A )

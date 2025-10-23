@@ -23,13 +23,11 @@ class GNN_Model ( torch.nn.Module ):
         return F.log_softmax ( X, dim = 1 )
 
 model = GNN_Model ( max_colors )
-#model.load_state_dict ( torch.load ( "../data/gnn_model_weights.pth" ) )
-
+model.load_state_dict ( torch.load ( "../data/gnn_weights10.pth" ) )
 optimizer = torch.optim.Adam ( model.parameters(), lr = 0.01, weight_decay = 5e-4 )
 
 def forward_pass ( X, A ):
     return model.forward_pass ( X, A )
 
-
-
-        
+def return_GNN():
+    return model, optimizer

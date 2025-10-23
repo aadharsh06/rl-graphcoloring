@@ -2,6 +2,7 @@
 import numpy as np
 import torch
 from torch_geometric.utils import dense_to_sparse
+from itertools import product
 
 # Test A
 A = np.array ( [
@@ -21,16 +22,28 @@ def init_features ( A, max_colors ):
     edge_index, edge_attr = dense_to_sparse ( A )
     
     X = np.hstack ( [ cur_colored, degree ] )
-    #X = torch.tensor ( X, dtype = torch.float )
     
     return X, edge_index
 
 def gen_random_graph():
     # Returning random adjecency matrix
-    
     n = np.random.randint ( 2, 11 )
     
     A = np.triu ( np.random.randint ( 0, 2, size = ( n, n ) ), 1 )
     A = A + A.T
 
     return A
+
+def all_graphs ( n ):
+    num_edges = n * (n - 1) // 2
+    graphs = []
+    
+    for bits in product ( [0, 1], repeat = num_edges ):
+        A = np.zeros ( ( n, n ), dtype = int )
+        upper_indices = np.triu_indices ( n, 1 )
+        A[upper_indices] = bits
+        A = A + A.T
+        graphs.append ( A )
+    
+    return graphs
+
