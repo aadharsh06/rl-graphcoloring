@@ -11,7 +11,6 @@ A = np.array ( [
 ] )
 
 def init_features ( A, max_colors ):
-    
     degree = np.sum ( A, axis = 0 ).reshape ( -1, 1 )
     deg_max = np.max ( degree )
     degree = degree / ( deg_max + 1 )
@@ -25,3 +24,13 @@ def init_features ( A, max_colors ):
     #X = torch.tensor ( X, dtype = torch.float )
     
     return X, edge_index
+
+def gen_random_graph():
+    # Returning random adjecency matrix
+    
+    n = np.random.randint ( 2, 11 )
+    
+    A = np.triu ( np.random.randint ( 0, 2, size = ( n, n ) ), 1 )
+    A = A + A.T
+
+    return A
