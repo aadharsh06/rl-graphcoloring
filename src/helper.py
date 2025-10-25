@@ -25,15 +25,6 @@ def init_features ( A, max_colors ):
     
     return X, edge_index
 
-def gen_random_graph():
-    # Returning random adjecency matrix
-    n = np.random.randint ( 2, 11 )
-    
-    A = np.triu ( np.random.randint ( 0, 2, size = ( n, n ) ), 1 )
-    A = A + A.T
-
-    return A
-
 def all_graphs ( n ):
     num_edges = n * (n - 1) // 2
     graphs = []
@@ -46,4 +37,3 @@ def all_graphs ( n ):
         graphs.append ( A )
     
     return graphs
-

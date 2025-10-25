@@ -3,7 +3,6 @@
 # Vertices are randomly permuted and their index is their identifier ( 0 to n - 1 )
 
 import numpy as np
-import gnn
 import helper as h
 import torch
 import pickle as p
@@ -77,7 +76,7 @@ def reward ( H, root, cur_graph ):
     
     return R
 
-def u_sa_calc ( H, cur_graph, cur_node ):
+def u_sa_calc ( H, cur_graph, cur_node, model ):
     c_puct = 2
     
     X, edge_index = h.init_features ( cur_graph.graph, max_colors )
@@ -86,13 +85,13 @@ def u_sa_calc ( H, cur_graph, cur_node ):
         X[node.vertex][node.color - 1] = 1 
     
     X = torch.tensor ( X, dtype = torch.float )
-    p_sa = gnn.forward_pass ( X, edge_index )
+    p_sa = model.forward_pass ( X, edge_index )
     p_sa = ( p_sa.detach().numpy() )[cur_node.vertex]
     
     u_sa = c_puct * p_sa * np.sqrt ( cur_node.n_sa.sum() / ( 1 + cur_node.n_sa ) )
     return u_sa
 
-def run_simulation ( cur_graph, root ):
+def run_simulation ( cur_graph, root, model ):
     root.expand ( cur_graph )
     
     cur_node = root
@@ -100,7 +99,7 @@ def run_simulation ( cur_graph, root ):
     while ( not cur_node.is_leaf ): 
         
         q_sa = cur_node.q_sa
-        u_sa = u_sa_calc ( H, cur_graph, cur_node )
+        u_sa = u_sa_calc ( H, cur_graph, cur_node, model )
         a_star = np.argmax ( (q_sa + u_sa) )
 
         H.append ( ( cur_node, a_star ) )
@@ -123,8 +122,12 @@ def print_tree ( node ):
     for child in node.children:
         print_tree ( child )
 
-def run_episode ( A ):
-    max_file = int ( max ( os.listdir ( "../training_data" ), key = lambda f: int ( re.search ( r'\d+', f ).group() ) ).split('.')[0][1:] )
+def run_episode ( A, model, path ):
+    try:
+        max_file = int ( max ( os.listdir ( path ), key = lambda f: int ( re.search ( r'\d+', f ).group() ) ).split('.')[0][1:] )
+    except:
+        max_file = 0
+        
     cur_graph = state_graph ( A )
     root = Node ( 0, 1, max_colors )
     
@@ -132,7 +135,7 @@ def run_episode ( A ):
     
     for vertex in range ( len ( cur_graph.colors ) - 1 ):
         for i in range ( 150 ):
-            run_simulation ( cur_graph, root )
+            run_simulation ( cur_graph, root, model )
         
         assign_color = np.argmax ( root.n_sa ) + 1
         cur_graph.colors[vertex+1] = assign_color
@@ -145,7 +148,7 @@ def run_episode ( A ):
         
         training_data = ( ( X, A ), vertex, root.n_sa )
         
-        with open ( "../training_data/x{}.pkl".format ( str ( max_file + 1 ) ), "wb" ) as f:
+        with open ( path + "/x{}.pkl".format ( str ( max_file + 1 ) ), "wb" ) as f:
             p.dump ( training_data, f )
         max_file += 1
         
